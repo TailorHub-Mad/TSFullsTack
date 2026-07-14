@@ -200,7 +200,7 @@ You may add these only after the required reservation flow is complete.
 
 - Source code in a public GitHub repository.
 - A README with setup instructions, run commands, test commands, sample credentials, and API decisions.
-- A deployed version of the application, with public frontend and API URLs documented in the README.
+- A deployed version of the application, with public frontend and API URLs documented in the README. A free-tier deployment is sufficient; for example, Vercel for the React frontend and Railway, Render, Fly.io, or a similar Java-compatible platform for the Spring Boot API. Any equivalent provider is acceptable.
 - A Postman collection containing the login, restaurant, availability, and reservation requests. Include it in the repository and document how to configure its base URL and authentication token.
 - A short explanation of the domain and technical trade-offs.
 - If AI tools were used, a concise note describing which tools helped, what was reviewed, and any limitations identified.
