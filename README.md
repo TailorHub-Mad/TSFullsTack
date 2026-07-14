@@ -1,10 +1,10 @@
-# Tailor Backend Challenge
+# Tailor Fullstack Challenge
 
 ## Goal
 
-Build a small REST API for discovering restaurants and managing table reservations.
+Build a small restaurant application for discovering restaurants and managing table reservations.
 
-This is a two-day, time-boxed exercise. The goal is not to build a complete restaurant platform; it is to show clear domain modelling, sensible API contracts, server-side validation, and pragmatic code structure in Java with Spring Boot.
+This is a two-day, time-boxed exercise. The goal is not to build a complete restaurant platform; it is to show clear domain modelling, sensible API contracts, server-side validation, pragmatic Java/Spring structure, and a usable React interface.
 
 ## Required Technology
 
@@ -12,6 +12,7 @@ This is a two-day, time-boxed exercise. The goal is not to build a complete rest
 - Spring Boot 3.
 - Maven or Gradle.
 - JSON REST API.
+- React with TypeScript for the frontend. Vite is a lightweight default; Next.js is also acceptable.
 
 Persistence is optional. For this exercise, an in-memory implementation loaded from the provided `restaurants.json` file is recommended. Data may reset when the application restarts.
 
@@ -168,13 +169,11 @@ Write a small, focused test suite for the reservation domain. At minimum, cover:
 
 Integration tests and API documentation are welcome but not required.
 
-## Frontend Suggestions (Optional)
+## Frontend
 
-A frontend is not required and is not part of the mandatory evaluation scope.
+Implement a frontend with React and TypeScript that consumes the Spring Boot API. Reservation availability and validation must remain server-side; do not reproduce the business rules in the browser.
 
-If you choose to build one, use React with TypeScript. Vite is a lightweight default; Next.js is also acceptable. It should consume the Spring Boot API rather than reproducing reservation logic in the browser.
-
-Suggested screens and flows:
+The required screens and flows are:
 
 - Demo login.
 - Restaurant list and restaurant detail.
@@ -182,6 +181,8 @@ Suggested screens and flows:
 - Slot selection and reservation creation.
 - Current user's reservations with cancellation.
 - Basic loading, empty, and error states.
+
+Keep the frontend intentionally small. Restaurant CRUD, comments, favourites, advanced state-management libraries, and pixel-perfect Figma reproduction are not expected.
 
 The supplied Figma file can be used as a visual reference, but pixel-perfect reproduction is not expected:
 
@@ -203,7 +204,7 @@ You may add these only after the required reservation flow is complete.
 
 - Source code in a public GitHub repository.
 - A README with setup instructions, run commands, test commands, sample credentials, and API decisions.
-- A deployed version of the API with its public URL documented in the README.
+- A deployed version of the application, with public frontend and API URLs documented in the README.
 - A Postman collection containing the login, restaurant, availability, and reservation requests. Include it in the repository and document how to configure its base URL and authentication token.
 - A short explanation of the domain and technical trade-offs.
 - If AI tools were used, a concise note describing which tools helped, what was reviewed, and any limitations identified.
@@ -217,6 +218,5 @@ The mandatory assessment focuses on:
 - Clear Java/Spring structure and separation of responsibilities.
 - Readable API contracts and code.
 - Relevant automated tests.
+- Frontend usability, API integration, and handling of loading, empty, and error states.
 - README quality and ability to explain implementation decisions.
-
-An optional React/TypeScript frontend is a positive addition, but its absence will not prevent a complete submission.
