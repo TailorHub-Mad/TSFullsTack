@@ -68,7 +68,7 @@ The response should make it easy for a client to identify whether a slot can acc
 ```json
 {
   "restaurantId": 1,
-  "date": "2026-07-10",
+  "date": "2035-07-10",
   "slots": [
     {
       "time": "13:00",
@@ -113,7 +113,7 @@ Example create request:
 ```json
 {
   "restaurantId": 1,
-  "date": "2026-07-10",
+  "date": "2035-07-10",
   "time": "13:30",
   "partySize": 4
 }
@@ -126,7 +126,7 @@ Example response:
   "id": "res_123",
   "restaurantId": 1,
   "userId": 1,
-  "date": "2026-07-10",
+  "date": "2035-07-10",
   "time": "13:30",
   "partySize": 4,
   "status": "confirmed"
