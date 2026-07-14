@@ -1,89 +1,68 @@
-# Tailor Fullstack Challenge
+# Tailor Backend Challenge
 
-## The Challenge
+## Goal
 
-Your task is to build a restaurants app where users can discover restaurants, manage favourites, leave comments, and create table reservations.
+Build a small REST API for discovering restaurants and managing table reservations.
 
-Reservations are based on time-slot availability. Each restaurant has a limited number of seats available per time slot, and every reservation reduces the available capacity for that specific restaurant, date, and time.
+This is a two-day, time-boxed exercise. The goal is not to build a complete restaurant platform; it is to show clear domain modelling, sensible API contracts, server-side validation, and pragmatic code structure in Java with Spring Boot.
 
-We are interested in a pragmatic, well-structured solution. Prioritise clear domain modelling, good API contracts, a usable frontend flow, and realistic tests over unnecessary complexity.
+## Required Technology
 
-## Backend
+- Java 21 or later.
+- Spring Boot 3.
+- Maven or Gradle.
+- JSON REST API.
 
-Build a REST API in Node.js using Express, Fastify, NestJS, or a similar framework.
+Persistence is optional. For this exercise, an in-memory implementation loaded from the provided `restaurants.json` file is recommended. Data may reset when the application restarts.
 
-TypeScript is expected. If you decide not to use it, explain why in the README.
+Keep business logic separate from HTTP controllers. If using in-memory or JSON storage, isolate it behind a repository or service rather than accessing collections directly from controllers.
 
-Persistence is optional. You may keep the data in memory, load it from JSON files, use a local database, or use a hosted free tier such as Supabase (https://supabase.com/), Neon (https://neon.com/), or MongoDB Atlas (https://www.mongodb.com/products/platform/atlas-database).
+## Required Scope
 
-Whichever option you choose, keep the data model clear and intentional. If you use a database, define the schema and manage migrations with an ORM or migration tool of your choice, such as Prisma, Drizzle, TypeORM, or similar.
+### 1. Authentication
 
-If you use in-memory or JSON-based storage, keep data access isolated behind repositories or services instead of coupling the business logic directly to arrays or files. We are more interested in clean boundaries and maintainable code than in a specific persistence technology.
-
-
-### Required Features
-
-1. Restaurants
-
-- Return the provided `restaurants.json` payload, an adapted version of it, or your own mock dataset.
-- Implement CRUD endpoints for restaurants.
-- Each restaurant should include enough information to render the list and detail views, such as name, description, address, image, rating, capacity, and cuisine type.
-- Each restaurant should define reservation settings, including service windows, slot interval, and default capacity per slot.
-- The provided seed already includes reservation-related fields such as `capacity` and `reservationSettings`.
-
-2. Users and Authentication
-
-- Create a `User` model with username, password, and favourite restaurants.
-- Implement login/authentication for the API.
-- Protect user-specific endpoints such as favourites and reservations.
-- JWT authentication is recommended, but a simpler token-based approach is acceptable if clearly documented.
-
-3. Favourites
-
-- Users should be able to add and remove restaurants from their favourites list.
-- Users should be able to retrieve their favourite restaurants.
-
-4. Comments
-
-- Implement CRUD endpoints for restaurant comments.
-- Comments should belong to a restaurant and a user.
-- The frontend should be able to create, edit, and delete comments.
-
-5. Availability
-
-- Users should be able to check available reservation slots for a restaurant on a specific date.
-- Availability should be generated from the restaurant reservation settings.
-- The default service windows are lunch from `13:00` to `15:00` and dinner from `20:00` to `23:00`, split into 30-minute slots.
-- Service window start times are inclusive and end times are exclusive. For example, `13:00` to `15:00` with 30-minute slots generates `13:00`, `13:30`, `14:00`, and `14:30`.
-- Each slot has a capacity. Existing reservations or seeded booked slots reduce the available seats.
-- If a future date has no existing bookings, the API should still generate the available slots from the restaurant settings.
-- Some slots in the seed data should already be partially booked or fully booked so the UI can display unavailable times.
-- Do not pre-create every future date in the dataset. Future dates should be generated on demand from `reservationSettings`.
-- The frontend should ask the user for a date and party size before displaying time slots.
-- The user should only be able to select a time slot that can fit the requested party size.
-
-The intended frontend flow is:
+Implement a minimal login endpoint for one seeded demo user.
 
 ```txt
-Restaurant detail
--> user selects date
--> user selects party size
--> frontend requests availability
--> user selects an available time slot
--> frontend creates the reservation
+POST /auth/login
 ```
 
-Availability should be calculated from:
+The authentication mechanism may use a documented simple token. JWT is not required. Reservation endpoints for the current user must require authentication.
+
+Include the demo credentials in the README.
+
+### 2. Restaurants
+
+Use the supplied `restaurants.json` payload, an adapted version of it, or a small equivalent seed dataset.
+
+Implement read-only restaurant endpoints:
 
 ```txt
-restaurant.reservationSettings.bookedSlots
-+ confirmed reservations created by users
-- cancelled reservations
+GET /restaurants
+GET /restaurants/{restaurantId}
 ```
 
-You may store new reservations separately instead of mutating the original seed data.
+Each restaurant response should expose enough information for a client to display a list and detail view, including its name, description, address, image, cuisine type, and reservation settings.
 
-Example response:
+Restaurant administration is not part of this exercise. Do not implement restaurant CRUD.
+
+### 3. Availability
+
+Users must be able to request the availability for a restaurant, date, and party size.
+
+```txt
+GET /restaurants/{restaurantId}/availability?date=YYYY-MM-DD&partySize=4
+```
+
+Generate slots from each restaurant's `reservationSettings`:
+
+- The default service windows are lunch from `13:00` to `15:00` and dinner from `20:00` to `23:00`.
+- The default slot interval is 30 minutes.
+- Window starts are inclusive and ends are exclusive. For example, `13:00` to `15:00` generates `13:00`, `13:30`, `14:00`, and `14:30`.
+- Each slot has the restaurant's configured capacity.
+- Future dates without bookings must still return generated slots.
+
+The response should make it easy for a client to identify whether a slot can accommodate the requested party size:
 
 ```json
 {
@@ -108,23 +87,27 @@ Example response:
 }
 ```
 
-6. Reservations
+Availability is calculated from:
 
-- Users should be able to create a reservation for a restaurant.
-- A reservation should include restaurant, user, date, time, party size, and status.
-- Store `date` and `time` as separate fields. For example, `date: "2026-07-10"` and `time: "13:30"`.
-- Use these reservation statuses:
-
-```ts
-type ReservationStatus = "confirmed" | "cancelled";
+```txt
+restaurant.reservationSettings.bookedSlots
++ confirmed reservations created by users
+- cancelled reservations
 ```
 
-- Creating a reservation should immediately consume capacity for the selected restaurant, date, and time.
-- Users should be able to list their own reservations.
-- Users should be able to cancel their own reservations.
-- Cancelling a reservation should make those seats available again.
+New reservations may be stored separately from the original seed data.
 
-Example create reservation request:
+### 4. Reservations
+
+Authenticated users must be able to create, list, and cancel their own reservations.
+
+```txt
+POST  /reservations
+GET   /me/reservations
+PATCH /reservations/{reservationId}/cancel
+```
+
+Example create request:
 
 ```json
 {
@@ -135,7 +118,7 @@ Example create reservation request:
 }
 ```
 
-Example reservation response:
+Example response:
 
 ```json
 {
@@ -149,142 +132,91 @@ Example reservation response:
 }
 ```
 
-The backend must recalculate availability when creating a reservation. The frontend availability response is useful for the UI, but it must not be trusted as the source of truth.
+Use these statuses:
+
+```java
+enum ReservationStatus {
+  CONFIRMED,
+  CANCELLED
+}
+```
 
 ### Business Rules
 
-Implement at least the following rules:
+Implement and validate these rules on the server:
 
 - A reservation cannot be created in the past.
-- A reservation time must match one of the restaurant's generated slots.
 - Party size must be greater than zero.
-- Party size cannot exceed the available seats for the selected slot.
-- Creating a reservation reduces the available seats for the same restaurant, date, and time.
-- Cancelling a reservation releases its seats back to the selected slot.
+- The requested time must be a generated slot for that restaurant.
+- Party size cannot exceed the available seats in that restaurant, date, and time slot.
+- Creating a confirmed reservation reduces the available seats immediately.
+- Cancelling a reservation releases its seats.
 - A cancelled reservation cannot be cancelled again.
-- Availability must be scoped by restaurant, date, and time.
-- Availability must be recalculated server-side before accepting a reservation.
+- A user can only list and cancel their own reservations.
+- The availability response is not the source of truth; recalculate availability before accepting a reservation.
 
-### Suggested API Endpoints
+Return appropriate HTTP status codes and a clear error response for invalid input, missing resources, unauthenticated requests, and rule violations.
 
-You may adjust the exact shape if your README explains the decisions.
+## Automated Tests
 
-```txt
-POST   /auth/login
+Write a small, focused test suite for the reservation domain. At minimum, cover:
 
-GET    /restaurants
-GET    /restaurants/:id
-POST   /restaurants
-PATCH  /restaurants/:id
-DELETE /restaurants/:id
+- Generating availability for a future date with no existing bookings.
+- Rejecting a reservation that exceeds the available capacity.
+- Reducing availability when a reservation is confirmed.
+- Releasing availability when a reservation is cancelled.
 
-GET    /me/favourites
-POST   /me/favourites/:restaurantId
-DELETE /me/favourites/:restaurantId
+Integration tests and API documentation are welcome but not required.
 
-GET    /restaurants/:restaurantId/comments
-POST   /restaurants/:restaurantId/comments
-PATCH  /comments/:commentId
-DELETE /comments/:commentId
+## Frontend Suggestions (Optional)
 
-GET    /restaurants/:restaurantId/availability?date=YYYY-MM-DD&partySize=4
+A frontend is not required and is not part of the mandatory evaluation scope.
 
-POST   /reservations
-GET    /me/reservations
-GET    /reservations/:reservationId
-PATCH  /reservations/:reservationId/cancel
-```
+If you choose to build one, use React with TypeScript. Vite is a lightweight default; Next.js is also acceptable. It should consume the Spring Boot API rather than reproducing reservation logic in the browser.
 
-## Frontend
+Suggested screens and flows:
 
-Create a Next.js app that consumes your API.
+- Demo login.
+- Restaurant list and restaurant detail.
+- Date and party-size selection followed by availability lookup.
+- Slot selection and reservation creation.
+- Current user's reservations with cancellation.
+- Basic loading, empty, and error states.
 
-### Required Features
-
-- Display an initial list of restaurants.
-- Allow the user to view restaurant details.
-- Allow the user to create, edit, and delete restaurants.
-- Allow the user to create, edit, and delete comments.
-- Allow the user to log in.
-- Allow the user to manage favourite restaurants.
-- Allow the user to select a restaurant, date, and party size to check available reservation times.
-- Display available and unavailable time slots clearly.
-- Allow the user to create a reservation for an available slot.
-- Display the user's reservations and their current status.
-- Allow the user to cancel a reservation.
-- Display loading states while API requests are in progress.
-- Display empty states and error states where appropriate.
-- Use a state management or server-state library where it makes sense.
-- Make it responsive and visually appealing.
-
-## Figma Design
-
-Use this Figma file as a visual reference:
+The supplied Figma file can be used as a visual reference, but pixel-perfect reproduction is not expected:
 
 https://www.figma.com/file/LuwjRZZb3ms0MeAmu7gZch/Tailor-Prueba-t%C3%A9cnica-Junior?type=design&node-id=2%3A15&mode=design&t=mYbsPNUJscBcb7yN-1
 
-The Figma design is only a small visual guide. You may reuse its style, layout ideas, typography, spacing, colours, and restaurant screens, but you are expected to adapt it and add whatever UI is missing to support the required functionality, especially date selection, party size, availability slots, reservation creation, and reservation management.
+## Explicitly Out of Scope
 
-Pixel-perfect implementation is not required. A coherent, usable, responsive interface is more important than matching every detail of the provided design.
+Do not spend time implementing:
 
-## Project Structure
+- Restaurant CRUD.
+- Restaurant comments.
+- Favourite restaurants.
+- User registration, password recovery, roles, or a production-grade authentication system.
+- A database, migrations, Docker, Swagger/OpenAPI, or end-to-end tests.
 
-You may organise the solution in any of the following ways:
-
-- A monorepo containing both backend and frontend apps.
-- Two separate repositories, one for the API and one for the frontend.
-- A single repository with clearly separated folders, for example `api/` and `web/`.
-
-Monorepo tooling such as Bun workspaces, npm/pnpm/yarn workspaces, Turborepo, Nx, or similar tools is accepted. Use whatever setup helps you keep the solution simple, easy to run, and easy to review.
-
-If you use multiple apps or repositories, document clearly how to install dependencies, run each app, run tests, and verify the main flow locally.
-
-## AI Usage
-
-Using AI tools to complete the challenge is accepted and encouraged. We care about how you use them, how you validate the output, and whether you can explain the final solution.
-
-If you use AI, include a short section in the README explaining:
-
-- Which AI tools or agents you used.
-- What parts of the solution they helped with.
-- What you reviewed, changed, or rejected.
-- Any limitations or risks you identified in the generated output.
-
-You may also include supporting evidence such as an `AGENTS.md`, custom agent instructions, skills, prompts, or notes used during the implementation. This is not required to be perfect, but it should make your workflow transparent.
-
-We will review the code structure, the AI usage notes, and your ability to explain the implementation during the technical discussion. Do not submit code you cannot reason about.
+You may add these only after the required reservation flow is complete.
 
 ## Deliverables
 
-- Push the code to a public GitHub repository.
-- Include a `README.md` explaining how to run the backend and frontend apps.
-- Include any required environment variables or setup steps.
-- Include sample credentials or seed data needed to test the app.
-- Include a short explanation of your technical decisions and trade-offs.
-- If AI tools were used, include the AI usage notes described above.
+- Source code in a public GitHub repository.
+- A README with setup instructions, run commands, test commands, sample credentials, and API decisions.
+- A deployed version of the API with its public URL documented in the README.
+- A Postman collection containing the login, restaurant, availability, and reservation requests. Include it in the repository and document how to configure its base URL and authentication token.
+- A short explanation of the domain and technical trade-offs.
+- If AI tools were used, a concise note describing which tools helped, what was reviewed, and any limitations identified.
 
-## Bonus Points
+## Evaluation
 
-- Deploy the app.
-- Use JWT authentication.
-- Use Tailwind CSS.
-- Add a persistence layer.
-- Add OpenAPI/Swagger documentation.
-- Add Docker or Docker Compose.
-- Write realistic unit tests for backend business rules.
-- Write integration tests for API endpoints.
-- Write end-to-end tests for the main frontend flow.
-- Add basic accessibility improvements.
+The mandatory assessment focuses on:
 
-## What We Will Evaluate
+- Correct handling of availability and reservation capacity.
+- Server-side validation and useful error handling.
+- Clear Java/Spring structure and separation of responsibilities.
+- Readable API contracts and code.
+- Relevant automated tests.
+- README quality and ability to explain implementation decisions.
 
-- Correctness of the main user flows.
-- API design and request validation.
-- Error handling.
-- Type safety.
-- Clear separation of concerns.
-- How reservation availability and state are modelled.
-- Frontend usability and responsiveness.
-- Loading, empty, and error states.
-- Test quality and relevance.
-- README quality and developer experience.
+An optional React/TypeScript frontend is a positive addition, but its absence will not prevent a complete submission.
