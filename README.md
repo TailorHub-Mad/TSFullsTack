@@ -4,7 +4,7 @@
 
 Build a small restaurant application for discovering restaurants and managing table reservations.
 
-This is a two-day, time-boxed exercise. The goal is not to build a complete restaurant platform; it is to show clear domain modelling, sensible API contracts, server-side validation, pragmatic Java/Spring structure, and a usable React interface.
+The goal is not to build a complete restaurant platform; it is to show clear domain modelling, sensible API contracts, server-side validation, pragmatic Java/Spring structure, and a usable React interface.
 
 ## Required Technology
 
