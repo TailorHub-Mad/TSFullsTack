@@ -182,11 +182,7 @@ The required screens and flows are:
 - Current user's reservations with cancellation.
 - Basic loading, empty, and error states.
 
-Keep the frontend intentionally small. Restaurant CRUD, comments, favourites, advanced state-management libraries, and pixel-perfect Figma reproduction are not expected.
-
-The supplied Figma file can be used as a visual reference, but pixel-perfect reproduction is not expected:
-
-https://www.figma.com/file/LuwjRZZb3ms0MeAmu7gZch/Tailor-Prueba-t%C3%A9cnica-Junior?type=design&node-id=2%3A15&mode=design&t=mYbsPNUJscBcb7yN-1
+Keep the frontend intentionally small. The interface is free-form: prioritise a simple, responsive, and usable experience over visual polish. Restaurant CRUD, comments, favourites, and advanced state-management libraries are not expected.
 
 ## Explicitly Out of Scope
 
